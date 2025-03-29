@@ -3,111 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
+    <title>Main Page</title>
     <style>
-        /* Palestinian Themed Styling */
         body {
-            font-family: 'Arial', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            font-family: Arial, sans-serif;
             margin: 0;
-            background: linear-gradient(to bottom, #000, #007a3d, #ffffff, #ce1126);
-        }
-
-        .register-container {
-            border: 2px solid black;
-            padding: 25px;
-            border-radius: 10px;
-            text-align: center;
-            background: rgba(255, 255, 255, 0.95);
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
-            width: 320px;
-        }
-
-        .register-container h1 {
-            margin-bottom: 20px;
-            color: #ce1126;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .input-group {
-            margin-bottom: 15px;
-            text-align: left;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #000;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid black;
-            border-radius: 5px;
-            font-size: 14px;
-            background-color: white;
-        }
-
-        .button-group {
+            padding: 0;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            align-items: center;
         }
 
-        .button-group button {
+        .navbar {
+            background-color: #ff0000;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
             width: 100%;
-            padding: 12px;
+        }
+
+        .navbar button {
+            background-color: green;
             border: none;
-            border-radius: 5px;
-            font-weight: bold;
-            font-size: 16px;
+            color: white;
+            font-size: 12px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin: 0 5px;
         }
 
-        .button-group button:first-child {
-            background-color: #ce1126;
-            color: white;
-        }
-
-        .button-group button:first-child:hover {
-            background-color: #a00e20;
-        }
-
-        .button-group button:nth-child(2) {
-            background-color: white; /* White color for Login Now */
-            color: black;
-        }
-
-        .button-group button:nth-child(2):hover {
-            background-color: #f0f0f0;
-        }
-
-        .button-group button:last-child {
-            background-color: #007a3d;
-            color: white;
-        }
-
-        .button-group button:last-child:hover {
+        .navbar button:hover {
             background-color: #005c2d;
         }
 
-        #error-message {
-            color: red;
+        .container {
+            width: 80%;
+            max-width: 700px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            margin-bottom: 50px;
+            align-self: center;
+        }
+
+        .post-input {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+        }
+
+        .post-input textarea, .post-input input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .post-input button {
+            padding: 10px;
+            background-color: #007a3d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .post-input button:hover {
+            background-color: #005c2d;
+        }
+
+        .feed {
+            width: 100%;
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            margin-top: 20px;
+            align-self: center;
+        }
+
+        .post {
+            background: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 5px solid #ff0000;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .post img {
+            max-width: 100%;
+            border-radius: 5px;
             margin-top: 10px;
         }
 
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .buttons button {
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .post-user {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .chat-icon {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: green;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1000;
+            font-size: 12px;
+        }
     </style>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBr-r8hYqb3D7F_T4eViVTcU2AydBpZW1w",
@@ -120,77 +150,104 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
         const db = getFirestore(app);
+        const storage = getStorage(app);
 
-        window.registerAndRedirect = function() {
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const errorMessage = document.getElementById('error-message');
+        function addPost() {
+            const postText = document.getElementById('postText').value;
+            const postImage = document.getElementById('postImage').files[0];
+            const user = "Anonymous"; // Replace with user's name if available
 
-            if (password !== confirmPassword) {
-                errorMessage.textContent = "Passwords do not match.";
-                return;
-            }
+            if (!postText && !postImage) return;
 
-            createUserWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    setDoc(doc(db, 'users', user.uid), {
-                        name: name,
-                        email: email
-                    })
-                    .then(() => {
-                        window.location.href = "mainpage.html"; // Redirect to mainpage.html after successful registration
-                    })
-                    .catch((error) => {
-                        errorMessage.textContent = "Error saving user data.";
+            if (postImage) {
+                const storageRef = ref(storage, 'postImages/' + postImage.name);
+                uploadBytes(storageRef, postImage).then(snapshot => {
+                    getDownloadURL(snapshot.ref).then(url => {
+                        savePost(user, postText, url);
                     });
-
-                })
-                .catch((error) => {
-                    const errorCode = error.code;
-                    const errorMessageText = error.message;
-                    errorMessage.textContent = errorMessageText;
                 });
+            } else {
+                savePost(user, postText);
+            }
+        }
+
+        function savePost(user, text, imageUrl = null) {
+            addDoc(collection(db, 'posts'), {
+                user: user,
+                text: text,
+                imageUrl: imageUrl,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                document.getElementById('postText').value = '';
+                document.getElementById('postImage').value = '';
+            });
+        }
+
+        function loadPosts() {
+            const q = query(collection(db, 'posts'), orderBy('timestamp', 'desc'));
+            onSnapshot(q, snapshot => {
+                const feed = document.getElementById('feed');
+                feed.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const postDiv = document.createElement('div');
+                    postDiv.classList.add('post');
+                    let postContent = `<div class="post-user">${data.user}</div><p>${data.text}</p>`;
+                    if (data.imageUrl) {
+                        postContent += `<img src="${data.imageUrl}" alt="Post Image">`;
+                    }
+                    postDiv.innerHTML = postContent;
+                    feed.appendChild(postDiv);
+                });
+            });
+        }
+
+        window.onload = function() {
+            loadPosts();
         };
 
-        window.goToMainPage = function() {
-            window.location.href = "mainpage.html";
+        window.profilePage = function() {
+            window.location.href = "profile.html";
         };
 
-        window.goBackToLogin = function() {
-            window.location.href = "index.html";
+        window.qaPage = function() {
+            window.location.href = "qa.html";
+        };
+
+        window.donationPage = function() {
+            window.location.href = "donation.html";
+        };
+
+        window.helpPage = function() {
+            window.location.href = "help.html";
+        };
+
+        window.chatPage = function() {
+            window.location.href = "chat.html";
         };
     </script>
 </head>
 <body>
-    <div class="register-container">
-        <h1>Register</h1>
-        <div class="input-group">
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name">
+    <div class="navbar">
+        <button onclick="qaPage()">Q/A</button>
+        <button onclick="donationPage()">Donation</button>
+        <button onclick="helpPage()">Help</button>
+        <button onclick="profilePage()">Profile</button>
+    </div>
+
+    <div class="container">
+        <h2>Post Something</h2>
+        <div class="post-input">
+            <textarea id="postText" placeholder="What's on your mind?"></textarea>
+            <input type="file" id="postImage" accept="image/*">
+            <button onclick="addPost()">Post</button>
         </div>
-        <div class="input-group">
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email">
-        </div>
-        <div class="input-group">
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password">
-        </div>
-        <div class="input-group">
-            <label for="confirmPassword">Confirm Password:</label>
-            <input type="password" id="confirmPassword" name="confirmPassword">
-        </div>
-        <div class="button-group">
-            <button onclick="registerAndRedirect()">Register</button>
-            <button onclick="goToMainPage()">Login Now</button>
-            <button onclick="goBackToLogin()">Go Back to Login</button>
-        </div>
-        <div id="error-message"></div>
+        <div class="feed" id="feed"></div>
+    </div>
+
+    <div class="chat-icon" onclick="chatPage()">
+        Chat
     </div>
 </body>
 </html>
