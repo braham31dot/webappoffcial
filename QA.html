@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q/A</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .header {
+            background-color: green;
+            color: black;
+            padding: 20px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .chat-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+            margin-top: 20px;
+        }
+
+        .message {
+            background-color: #f0f0f0;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border-left: 5px solid red;
+        }
+
+        .message .sender {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .input-area {
+            display: flex;
+            padding: 10px;
+            border-top: 1px solid #ccc;
+        }
+
+        .input-area input[type="text"] {
+            flex-grow: 1;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 5px;
+        }
+
+        .input-area button {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .footer {
+            padding: 10px;
+            text-align: center;
+            font-size: 0.8em;
+            color: #666;
+            background-color: #f0f0f0;
+        }
+    </style>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBr-r8hYqb3D7F_T4eViVTcU2AydBpZW1w",
+            authDomain: "webapp-53ab8.firebaseapp.com",
+            projectId: "webapp-53ab8",
+            storageBucket: "webapp-53ab8.firebasestorage.app",
+            messagingSenderId: "895276267102",
+            appId: "1:895276267102:web:6f07e18b0407a95dbae6cf",
+            measurementId: "G-2441ZTT2G7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const chatContainer = document.getElementById('chatContainer');
+        const messageInput = document.getElementById('messageInput');
+
+        function sendMessage() {
+            const messageText = messageInput.value;
+            const sender = "Anonymous"; // Replace with user's name if available
+
+            if (!messageText) return;
+
+            saveMessage(sender, messageText);
+        }
+
+        function saveMessage(sender, text) {
+            addDoc(collection(db, 'qaMessages'), {
+                sender: sender,
+                text: text,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                messageInput.value = '';
+            });
+        }
+
+        const q = query(collection(db, 'qaMessages'), orderBy('timestamp', 'desc'));
+        onSnapshot(q, snapshot => {
+            chatContainer.innerHTML = '';
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message');
+                const messageContent = `<div class="sender">${data.sender}</div><p>${data.text}</p>`;
+                messageDiv.innerHTML = messageContent;
+                chatContainer.appendChild(messageDiv);
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="header">Q/A</div>
+
+    <div class="chat-container" id="chatContainer"></div>
+
+    <div class="input-area">
+        <input type="text" id="messageInput" placeholder="Ask your question...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <div class="footer">
+        To ensure a safe and respectful environment for all users, we implement robust moderation and data protection measures through Firebase. Your right to express thoughts and opinions is paramount; however, we require that all communication be conducted with civility and respect. Firebase facilitates content moderation, quality assurance, and data collection, which are essential for maintaining platform integrity and user safety. We are committed to protecting your privacy. The information you provide, such as your name and email address, is solely used for account security and operational purposes within this web application. We adhere to stringent data protection policies and will not disclose or utilize your personal information for any external or unauthorized activities. Copyright reserved.
+    </div>
+</body>
+</html>
+

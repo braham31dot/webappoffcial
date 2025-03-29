@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, #000, #007a3d, #ffffff, #ce1126); /* Palestine flag colors */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .profile-container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 300px;
+            text-align: left;
+        }
+
+        .profile-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            margin-bottom: 10px;
+        }
+
+        .info-item label {
+            font-weight: bold;
+            display: block;
+        }
+
+        .info-item input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .links {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .links a {
+            margin: 0 10px;
+            text-decoration: none;
+            color: #007a3d;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        .password-toggle {
+            cursor: pointer;
+            color: #007a3d;
+            margin-left: 5px;
+        }
+    </style>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBr-r8hYqb3D7F_T4eViVTcU2AydBpZW1w",
+            authDomain: "webapp-53ab8.firebaseapp.com",
+            projectId: "webapp-53ab8",
+            storageBucket: "webapp-53ab8.firebasestorage.app",
+            messagingSenderId: "895276267102",
+            appId: "1:895276267102:web:6f07e18b0407a95dbae6cf",
+            measurementId: "G-2441ZTT2G7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleButton = document.querySelector('.password-toggle');
+
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                toggleButton.textContent = "Hide";
+            } else {
+                passwordInput.type = "password";
+                toggleButton.textContent = "Show";
+            }
+        }
+
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                const userDoc = doc(db, 'users', user.uid);
+                getDoc(userDoc).then(docSnap => {
+                    if (docSnap.exists()) {
+                        const userData = docSnap.data();
+                        document.getElementById('name').value = userData.name;
+                        document.getElementById('email').value = userData.email;
+                    }
+                });
+            } else {
+                window.location.href = "login.html"; // Redirect to login if not logged in
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="profile-container">
+        <h2>Personal Information</h2>
+        <div class="info-item">
+            <label for="name">Name:</label>
+            <input type="text" id="name" value="User Name" readonly>
+        </div>
+        <div class="info-item">
+            <label for="email">Email:</label>
+            <input type="email" id="email" value="user@example.com" readonly>
+        </div>
+        <div class="info-item">
+            <label for="password">Password:</label>
+            <input type="password" id="password" value="********" readonly>
+            <span class="password-toggle" onclick="togglePassword()">Show</span>
+        </div>
+    </div>
+</body>
+</html>
+

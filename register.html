@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <style>
+        /* Palestinian Themed Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(to bottom, #000, #007a3d, #ffffff, #ce1126);
+        }
+
+        .register-container {
+            border: 2px solid black;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+            width: 320px;
+        }
+
+        .register-container h1 {
+            margin-bottom: 20px;
+            color: #ce1126;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid black;
+            border-radius: 5px;
+            font-size: 14px;
+            background-color: white;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .button-group button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .button-group button:first-child {
+            background-color: #ce1126;
+            color: white;
+        }
+
+        .button-group button:first-child:hover {
+            background-color: #a00e20;
+        }
+
+        .button-group button:nth-child(2) {
+            background-color: white; /* White color for Login Now */
+            color: black;
+        }
+
+        .button-group button:nth-child(2):hover {
+            background-color: #f0f0f0;
+        }
+
+        .button-group button:last-child {
+            background-color: #007a3d;
+            color: white;
+        }
+
+        .button-group button:last-child:hover {
+            background-color: #005c2d;
+        }
+
+        #error-message {
+            color: red;
+            margin-top: 10px;
+        }
+
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+</head>
+<body>
+    <div class="register-container">
+        <h1>Register</h1>
+        <div class="input-group">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name">
+        </div>
+        <div class="input-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email">
+        </div>
+        <div class="input-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password">
+        </div>
+        <div class="input-group">
+            <label for="confirmPassword">Confirm Password:</label>
+            <input type="password" id="confirmPassword" name="confirmPassword">
+        </div>
+        <div class="button-group">
+            <button onclick="registerAndRedirect()">Register</button>
+            <button onclick="goToMainPage()">Login Now</button>
+            <button onclick="goBackToLogin()">Go Back to Login</button>
+        </div>
+        <div id="error-message"></div>
+    </div>
+
+    <script>
+        function registerAndRedirect() {
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const errorMessage = document.getElementById('error-message');
+
+            if (password !== confirmPassword) {
+                errorMessage.textContent = "Passwords do not match.";
+                return;
+            }
+
+            firebase.auth().createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    firebase.firestore().collection('users').doc(user.uid).set({
+                        name: name,
+                        email: email
+                    })
+                    .then(() => {
+                        window.location.href = "mainpage.html"; // Redirect to mainpage.html after successful registration
+                    })
+                    .catch((error) => {
+                        errorMessage.textContent = "Error saving user data.";
+                    });
+
+                })
+                .catch((error) => {
+                    const errorCode = error.code;
+                    const errorMessageText = error.message;
+                    errorMessage.textContent = errorMessageText;
+                });
+        }
+
+        function goToMainPage() {
+            window.location.href = "mainpage.html";
+        }
+
+        function goBackToLogin() {
+            window.location.href = "login.html";
+        }
+    </script>
+</body>
+</html>
