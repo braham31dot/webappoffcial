@@ -104,10 +104,67 @@
         }
 
     </style>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-    <script src="firebase-config.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBr-r8hYqb3D7F_T4eViVTcU2AydBpZW1w",
+            authDomain: "webapp-53ab8.firebaseapp.com",
+            projectId: "webapp-53ab8",
+            storageBucket: "webapp-53ab8.firebasestorage.app",
+            messagingSenderId: "895276267102",
+            appId: "1:895276267102:web:6f07e18b0407a95dbae6cf",
+            measurementId: "G-2441ZTT2G7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        window.registerAndRedirect = function() {
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const errorMessage = document.getElementById('error-message');
+
+            if (password !== confirmPassword) {
+                errorMessage.textContent = "Passwords do not match.";
+                return;
+            }
+
+            createUserWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    setDoc(doc(db, 'users', user.uid), {
+                        name: name,
+                        email: email
+                    })
+                    .then(() => {
+                        window.location.href = "mainpage.html"; // Redirect to mainpage.html after successful registration
+                    })
+                    .catch((error) => {
+                        errorMessage.textContent = "Error saving user data.";
+                    });
+
+                })
+                .catch((error) => {
+                    const errorCode = error.code;
+                    const errorMessageText = error.message;
+                    errorMessage.textContent = errorMessageText;
+                });
+        };
+
+        window.goToMainPage = function() {
+            window.location.href = "mainpage.html";
+        };
+
+        window.goBackToLogin = function() {
+            window.location.href = "index.html";
+        };
+    </script>
 </head>
 <body>
     <div class="register-container">
@@ -135,49 +192,5 @@
         </div>
         <div id="error-message"></div>
     </div>
-
-    <script>
-        function registerAndRedirect() {
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const errorMessage = document.getElementById('error-message');
-
-            if (password !== confirmPassword) {
-                errorMessage.textContent = "Passwords do not match.";
-                return;
-            }
-
-            firebase.auth().createUserWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    firebase.firestore().collection('users').doc(user.uid).set({
-                        name: name,
-                        email: email
-                    })
-                    .then(() => {
-                        window.location.href = "mainpage.html"; // Redirect to mainpage.html after successful registration
-                    })
-                    .catch((error) => {
-                        errorMessage.textContent = "Error saving user data.";
-                    });
-
-                })
-                .catch((error) => {
-                    const errorCode = error.code;
-                    const errorMessageText = error.message;
-                    errorMessage.textContent = errorMessageText;
-                });
-        }
-
-        function goToMainPage() {
-            window.location.href = "mainpage.html";
-        }
-
-        function goBackToLogin() {
-            window.location.href = "login.html";
-        }
-    </script>
 </body>
 </html>
